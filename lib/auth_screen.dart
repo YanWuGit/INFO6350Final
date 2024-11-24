@@ -95,6 +95,14 @@ class AuthScreenState extends State<AuthScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+          child: const Text('Skip'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PostList()),
+            );
+          }),
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project/utils/camera_utils.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/utils/input_field.dart';
 import 'package:final_project/post_list.dart';
@@ -25,6 +27,41 @@ class _NewPostState extends State<NewPost> {
       setState(() {
         itemPhoto = image;
       });
+    }
+  }
+
+  Future<void> _uploadData() async {
+    String title = _titleController.text;
+    String price = _priceController.text;
+    String description = _descriptionController.text;
+
+    if (itemPhoto != null) {
+      // Upload image to Firebase Storage
+      String imagePath = itemPhoto!.path;
+
+      try {
+
+        // Upload data to Firestore
+        await FirebaseFirestore.instance.collection('sale_posts').add({
+          'title': title,
+          'price': price,
+          'description': description,
+          'imagePath': imagePath,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Optionally navigate back or show a success message
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PostList()),
+        );
+      } catch (e) {
+        print("Error uploading: $e");
+        // Handle any errors or show a message to the user
+      }
+    } else {
+      // Optionally, handle the case where no image is selected
+      print("No image selected");
     }
   }
 
@@ -79,13 +116,8 @@ class _NewPostState extends State<NewPost> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          child: const Text('Post'),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const PostList()),
-            );
-          }),
+          onPressed: _uploadData,
+          child: const Text('Post')),
     );
   }
 }
